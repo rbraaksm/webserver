@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 14:50:15 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/23 11:09:33 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/23 18:04:58 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,12 @@ class ConfigParser
 
 		std::fstream 	_configFile;
 		std::string		_configLine;
-		int	_argc;
-		char **_argv;
-		int _lineCount;
-		int	_serverBlockIsOpen;
+		int				_argc;
+		char			**_argv;
+		int 			_lineCount;
+		int				_serverBlockIsOpen;
+		size_t			_open;
+		size_t			_closed;
 		ConfigParser(void);
 
 	public:
@@ -55,6 +57,8 @@ class ConfigParser
 		bool			skipEmptyLineAndComments();
 		void			createServer(ServerCluster *serverCluster);
 		void			setLocation(Server *newServer);
+
+		void			globalScope();
 
 };
 
