@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 15:10:54 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/22 15:43:46 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/23 11:22:33 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,33 +51,26 @@ void		ConfigParser::openConfigFile()
 
 Location*	ConfigParser::getLocation(std::string &startline)
 {
-	std::string configLine;
 	std::string locationPath;
 
 	locationPath = Utils::checkLocationPath(startline, this->_lineCount);
 	Location *newLocation = new Location(locationPath);
-	while (std::getline(this->_configFile, configLine))
+	while (1)
 	{
-		++this->_lineCount;
-		if (this->_configFile.eof())
-			throw parseError("end of file ", this->_lineCount);
-		if (Utils::skipEmptyLine(configLine))
-			continue;
-		if (configLine[0] == '#')
-			continue;
-		configLine = Utils::removeLeadingAndTrailingSpaces(configLine);
+		if (this->skipEmptyLineAndComments() == false)
+				throw parseError("end of file ", this->_lineCount);
 
-		if (configLine == "server {" || Utils::findFirstWord(configLine) == "location")
+		if (this->_configLine == "server {" || Utils::findFirstWord(this->_configLine) == "location")
 		{
 			throw parseError("block not closed ", this->_lineCount);
 			return NULL;
 		}
-		if (configLine == "}")
+		if (this->_configLine == "}")
 			break;
-		std::string key = Utils::findFirstWord(configLine);
+		std::string key = Utils::findFirstWord(this->_configLine);
 		if (key.size() <= 0)
-			throw parseError("not found " + configLine, this->_lineCount);
-		newLocation->findKey(key, configLine, this->_lineCount); // removed try/catch block
+			throw parseError("not found " + this->_configLine, this->_lineCount);
+		newLocation->findKey(key, this->_configLine, this->_lineCount);
 	}
 	newLocation->parameterCheck(this->_lineCount);
 	if (this->_configFile.eof())
@@ -85,85 +78,85 @@ Location*	ConfigParser::getLocation(std::string &startline)
 	return (newLocation);
 }
 
-void		ConfigParser::removeComments(std::string configLine)
+void		ConfigParser::removeComments(void)
 {
-	configLine.erase(std::find(configLine.begin(), configLine.end(), '#'), configLine.end()); // remove comments
+	this->_configLine.erase(std::find(this->_configLine.begin(), this->_configLine.end(), '#'), this->_configLine.end()); // remove comments
 }
 
-
-void		ConfigParser::parseLoop(ServerCluster *serverCluster, std::string configLine, std::string Block)
+bool		ConfigParser::receiveNextLine(void)
 {
-	while (std::getline(this->_configFile, configLine))
+	++this->_lineCount;
+	std::getline(this->_configFile, this->_configLine);
+	return true;
+}
+
+bool		ConfigParser::skipEmptyLineAndComments(void)
+{
+	while (receiveNextLine())
 	{
-		++this->_lineCount;
 		if (this->_configFile.eof())
-			break;
-		this->removeComments(configLine);
-		if (Utils::skipEmptyLine(configLine) == true)
+			return false;
+		this->removeComments();
+		if (Utils::skipEmptyLine(this->_configLine) == true)
 			continue;
-		configLine = Utils::removeLeadingAndTrailingSpaces(configLine);
-		if (configLine[0] == '#')
+		this->_configLine = Utils::removeLeadingAndTrailingSpaces(this->_configLine);
+		if (this->_configLine[0] == '#')
 			continue;
+		break ;		
+	}
+	return true;
+}
 
+void		ConfigParser::setLocation(Server *newServer)
+{
+	Location *newLocation = getLocation(this->_configLine);
+	newServer->addLocation(newLocation);
+}
 
-		if (configLine != "server {")
-			throw parseError("no Server block detected", this->_lineCount);
+void		ConfigParser::createServer(ServerCluster *serverCluster)
+{
 		Server	*newServer = new Server;
 		this->_serverBlockIsOpen = 1;
-		while (std::getline(this->_configFile, configLine))
+		while(1)
 		{
-			this->_lineCount++;
-			if (this->_configFile.eof())
+			if (this->skipEmptyLineAndComments() == false)
 				throw parseError("end of file ", this->_lineCount);
-			configLine.erase(std::find(configLine.begin(), configLine.end(), '#'), configLine.end()); // remove comments
-			if (Utils::skipEmptyLine(configLine) == true)
-				continue;
-			if (configLine[0] == '#')
-				continue;
-			configLine = Utils::removeLeadingAndTrailingSpaces(configLine);
-			if (Utils::findFirstWord(configLine) == "location")
-			{
-				Location *newLocation = getLocation(configLine);
-				newServer->addLocation(newLocation);
-			}
-			else if (configLine == "}")
+	
+			if (Utils::findFirstWord(this->_configLine) == "location")
+				this->setLocation(newServer);
+			else if (this->_configLine == "}")
 			{
 				this->_serverBlockIsOpen = 0;
 				break;
 			}
 			else {
-				std::string key = Utils::findFirstWord(configLine);
-				// if (key.size() <= 0)
-				// 	throw parseError("not found " + configLine, this->_lineCount);
-				newServer->findKey(key, configLine, this->_lineCount); // removed try/catch block
+				std::string key = Utils::findFirstWord(this->_configLine);
+				newServer->findKey(key, this->_configLine, this->_lineCount);
 			}
 		}
 		newServer->setAutoIndexOfLocations();
 		newServer->parameterCheck(this->_lineCount);
 		serverCluster->addServer(newServer);
 		std::cout << *newServer << std::endl;
-		(void)Block;
-	}
+}
+void		ConfigParser::lookingForServer(ServerCluster *serverCluster)
+{
+		if (this->skipEmptyLineAndComments() == true)
+		{
+			if (this->_configLine != "server {")
+				throw parseError("no Server block detected", this->_lineCount);
+			this->createServer(serverCluster);
+			this->lookingForServer(serverCluster);
+		}
 	if (this->_serverBlockIsOpen)
 		throw parseError("Server block isn't closed ", ++this->_lineCount);
+
 }
 
 
 void		ConfigParser::parseTheConfigFile(ServerCluster *serverCluster)
 {
-	std::string configLine;
-
-	while(1)
-	{
-		/* .eof() break */
-		/* Looking for server { */
-		/*		-->   while loop init serverBlock */
-		
-		/* looking for } --> back to first loop */
-		break ;
-	}
-
-	this->parseLoop(serverCluster, configLine, "Server");
+	this->lookingForServer(serverCluster);
 	if (serverCluster->clusterIsEmpty())
 		throw clusterError("Cluster seems to be empty", "check your input");
 }
