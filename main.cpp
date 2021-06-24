@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 12:00:58 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/22 11:07:13 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/24 16:56:01 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@
 int main (int argc, char **argv)
 {
 	ServerCluster	serverCluster;
-	ConfigParser	configParser(argc, argv);
+	ConfigParser	configParser(argv);
 	if (argc == 2)
 	{
 		try
 		{
 			configParser.openConfigFile();
 			configParser.parseTheConfigFile(&serverCluster);
-			
+
 			// serverCluster.checkDuplicatePorts();
 			// serverCluster.startup();
 			// serverCluster.startListening();

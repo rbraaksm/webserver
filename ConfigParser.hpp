@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 14:50:15 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/24 13:08:41 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/24 16:55:45 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,17 +25,17 @@ class ConfigParser
 	private:
 
 		std::fstream 						_configFile;
-		std::string							_configLine;
 		std::vector<std::string>			_configLines;
 		std::vector<std::string>::iterator	_it;
-		int									_argc;
+
+		std::vector<int>					_configCount;
+		std::vector<int>::iterator			_count_it;
 		char								**_argv;
-		int 								_lineCount;
 		ConfigParser(void);
 
 	public:
 
-		ConfigParser(int argc, char **argv);
+		ConfigParser(char **argv);
 		ConfigParser(ConfigParser const &src);
 		~ConfigParser(void);
 
@@ -54,9 +54,9 @@ class ConfigParser
 		void			createServer(ServerCluster *serverCluster);
 		void			setLocation(Server *newServer);
 
-		bool			receiveNextLine();
-		void			removeComments();
-		bool			createLine();
+		bool			receiveNextLine(std::string *line, size_t *count);
+		void			removeComments(std::string *line);
+		bool			createLine(std::string *line, size_t *count);
 		void			createArray();
 
 		void			printFile();

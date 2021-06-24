@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 14:59:49 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/24 12:16:53 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/24 16:57:56 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@
 namespace Utils
 {
 
-bool	skipEmptyLine(std::string &line) {
-	size_t start = line.find_first_not_of(WHITESPACE, 0);
+bool	skipEmptyLine(std::string *line) {
+	size_t start = line->find_first_not_of(WHITESPACE, 0);
 	return (start == std::string::npos) ? true : false;
 
 }
@@ -55,6 +55,18 @@ std::string removeTrailingSpaces(const std::string &line) {
 std::string removeLeadingAndTrailingSpaces(const std::string &line) {
 	return removeTrailingSpaces(removeLeadingSpaces(line));
 }
+
+void		removeSpacesBeforeAfter(std::string *line)
+{
+	size_t n = line->find_last_not_of(WHITESPACE);
+	size_t x = line->find_first_not_of(WHITESPACE);
+	std::string nw;
+	if (n != std::string::npos)
+		line->assign(line->substr(0, n + 1));
+	if (x != std::string::npos)
+		line->assign(line->substr(x));
+}
+
 
 std::string splitUserFromString(const std::string &line, const char* delimiter) {
 	std::string result;
