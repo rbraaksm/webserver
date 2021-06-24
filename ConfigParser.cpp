@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 15:10:54 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/23 18:37:17 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/24 13:08:21 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 
 ConfigParser::ConfigParser(int argc, char **argv) : _argc(argc), _argv(argv) {
 	this->_lineCount = 0;
-	this->_open = 0;
-	this->_closed = 0;
 	return;
 }
 
@@ -51,149 +49,116 @@ void		ConfigParser::openConfigFile()
 	}
 }
 
-void		ConfigParser::removeComments(void)
+void		ConfigParser::removeComments()
 {
 	this->_configLine.erase(std::find(this->_configLine.begin(), this->_configLine.end(), '#'), this->_configLine.end());
 }
 
-bool		ConfigParser::receiveNextLine(void)
+bool		ConfigParser::receiveNextLine()
 {
 	++this->_lineCount;
 	std::getline(this->_configFile, this->_configLine);
 	return true;
 }
 
-bool		ConfigParser::skipEmptyLineAndComments(void)
-{
-	while (receiveNextLine())
-	{
-		if (this->_configFile.eof())
-			return false;
-		this->removeComments();
-		if (Utils::skipEmptyLine(this->_configLine) == true)
-			continue;
-		this->_configLine = Utils::removeLeadingAndTrailingSpaces(this->_configLine);
-		if (this->_configLine[0] == '#')
-			continue;
-		break ;
-	}
-	return true;
-}
-
 void		ConfigParser::setLocation(Server *newServer)
 {
-	std::string locationPath;
-
-	locationPath = Utils::checkLocationPath(this->_configLine, this->_lineCount);
+	std::string locationPath = Utils::checkLocationPath(*this->_it, this->_lineCount);
 	Location *newLocation = new Location(locationPath);
 
-	while (1)
+	++this->_it;
+	while (*this->_it != "}")
 	{
-		if (this->skipEmptyLineAndComments() == false)
-			throw parseError("end of file ", this->_lineCount);
-		if (this->_configLine == "server {" || Utils::findFirstWord(this->_configLine) == "location")
+		if (*this->_it == "server {" || Utils::findFirstWord(*this->_it) == "location")
 			throw parseError("block not closed ", this->_lineCount);
-		if (this->_configLine == "}")
-			break;
-		std::string key = Utils::findFirstWord(this->_configLine);
+		std::string key = Utils::findFirstWord(*this->_it);
 		if (key.size() <= 0)
-			throw parseError("not found " + this->_configLine, this->_lineCount);
-		newLocation->findKey(key, this->_configLine, this->_lineCount);
+			throw parseError("not found " + *this->_it, this->_lineCount);
+		newLocation->findKey(key, *this->_it, this->_lineCount);
+		++this->_it;
 	}
+	++this->_it;
 	newLocation->parameterCheck(this->_lineCount);
-	if (this->_configFile.eof())
-		throw parseError("end of file ", this->_lineCount);
-
 	newServer->addLocation(newLocation);
 }
 
 void		ConfigParser::createServer(ServerCluster *serverCluster)
 {
-		Server	*newServer = new Server;
-		this->_serverBlockIsOpen = 1;
-		while(1)
+	Server	*newServer = new Server;
+	++this->_it;
+	while(*this->_it != "}")
+	{
+		if (Utils::findFirstWord(*_it) == "location")
+			this->setLocation(newServer);
+		else
 		{
-			if (this->skipEmptyLineAndComments() == false)
-			{
-				if (_configLine != "}")
-					throw parseError("end of file ", this->_lineCount);
-			}
-
-			if (Utils::findFirstWord(this->_configLine) == "location")
-			{
-				this->setLocation(newServer);
-			}
-			else if (this->_configLine == "}")
-			{
-				this->_serverBlockIsOpen = 0;
-				break;
-			}
-			else {
-				std::string key = Utils::findFirstWord(this->_configLine);
-				newServer->findKey(key, this->_configLine, this->_lineCount);
-			}
+			std::string key = Utils::findFirstWord(*this->_it);
+			newServer->findKey(key, *this->_it, this->_lineCount);
+			++this->_it;
 		}
-		newServer->setAutoIndexOfLocations();
-		newServer->parameterCheck(this->_lineCount);
-		serverCluster->addServer(newServer);
-		std::cout << *newServer << std::endl;
+	}
+	newServer->setAutoIndexOfLocations();
+	newServer->parameterCheck(this->_lineCount);
+	serverCluster->addServer(newServer);
+	std::cout << *newServer << std::endl;
 }
+
 
 void		ConfigParser::lookingForServer(ServerCluster *serverCluster)
 {
-	if (this->skipEmptyLineAndComments() == true)
-		{
-			if (this->_configLine != "server {")
-				throw parseError("no Server block detected", this->_lineCount);
+	for(this->_it = this->_configLines.begin(); this->_it != this->_configLines.end();)
+	{
+		if (*this->_it == "server {")
 			this->createServer(serverCluster);
-			this->lookingForServer(serverCluster);
-		}
-	if (this->_serverBlockIsOpen)
-		throw parseError("Server block isn't closed ", ++this->_lineCount);
-
+		++this->_it;
+	}
 }
 
-void	ConfigParser::globalScope(void)
+bool		ConfigParser::createLine()
 {
-	std::fstream	file;
-	std::string		line;
-	// char**			array = NULL;
-	int				i = 0;
-
-	file.open(this->_argv[1]);
-	while (std::getline(file, line))
+	int i = 0;
+	while (receiveNextLine())
 	{
-		++i;
-		line.erase(std::find(line.begin(), line.end(), '#'), line.end());
-		line = Utils::removeLeadingAndTrailingSpaces(line);
-
-		// int n = line.length();
-		// strcpy(array[i], line.c_str());
-
-	    // for (int x = 0; x < n; x++)
-	    //     cout << array[i][x];
-
-
-		// array[i] = line;
+		if (i > 0)
+			return false;
+		if (this->_configFile.eof())
+			++i;
+		this->removeComments();
 		if (Utils::skipEmptyLine(this->_configLine) == true)
 			continue;
-		if (line[0] == '#')
-			continue;
-		this->_open += std::count(line.begin(), line.end(), '{');
-		this->_closed += std::count(line.begin(), line.end(), '}');
-		if (file.eof())
-			break ;
+		this->_configLine = Utils::removeLeadingAndTrailingSpaces(this->_configLine);
+		break ;
 	}
-	// std::cout << this->_open << std::endl;
-	// std::cout << this->_closed << std::endl;
-	if (this->_open != this->_closed)
-		throw parseError(this->_open > this->_closed ? "Brackets aren't closed " : " Brackets aren't open ", 9);
+	return true;
 }
 
+void		ConfigParser::createArray(void)
+{
+	size_t open = 0;
+	size_t closed = 0;
+	while (this->createLine())
+	{
+		this->_configLines.push_back(this->_configLine);
+		open += std::count(this->_configLine.begin(), this->_configLine.end(), '{');
+		closed += std::count(this->_configLine.begin(), this->_configLine.end(), '}');
+		if (open < closed)
+			throw parseError("Brackets aren't open ", this->_lineCount);
+	}
+	if (open > closed)
+		throw parseError("Brackets aren't closed ", this->_lineCount);
+}
+
+void		ConfigParser::printFile(void)
+{
+	std::cout << "Print file:" << std::endl;
+	for (this->_it = _configLines.begin(); this->_it != _configLines.end(); ++this->_it)
+		std::cout << *this->_it << std::endl;
+}
 
 void		ConfigParser::parseTheConfigFile(ServerCluster *serverCluster)
 {
-	/* check globalscope configFile */
+	this->createArray();
+	// this->printFile();
 
 	this->lookingForServer(serverCluster);
 	if (serverCluster->clusterIsEmpty())
