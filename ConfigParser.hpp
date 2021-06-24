@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 14:50:15 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/24 16:55:45 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/24 17:04:45 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ class ConfigParser
 		void			createArray();
 
 		void			printFile();
-		bool			findCharacter();
+		void			plusIterators();
 
 };
 

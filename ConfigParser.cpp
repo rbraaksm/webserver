@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 15:10:54 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/24 17:00:08 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/24 18:11:59 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,13 @@ void	ConfigParser::createServer(ServerCluster *serverCluster)
 	newServer->setAutoIndexOfLocations();
 	newServer->parameterCheck(*this->_count_it);
 	serverCluster->addServer(newServer);
-	std::cout << *newServer << std::endl;
+	// std::cout << *newServer << std::endl;
+}
+
+void	ConfigParser::plusIterators(void)
+{
+	++this->_count_it;
+	++this->_it;
 }
 
 void	ConfigParser::lookingForServer(ServerCluster *serverCluster)
@@ -162,7 +168,7 @@ void	ConfigParser::printFile(void)
 	for (this->_it = _configLines.begin(); this->_it != _configLines.end(); ++this->_it)
 	{
 		std::cout << "[" << *this->_count_it << "] " << *this->_it << std::endl;
-		++_count_it;
+		++this->_count_it;
 	}
 }
 
