@@ -3,10 +3,10 @@
 /*                                                        ::::::::            */
 /*   Location.hpp                                       :+:    :+:            */
 /*                                                     +:+                    */
-/*   By: timvancitters <timvancitters@student.co      +#+                     */
+/*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/11 10:33:58 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/15 15:25:10 by timvancitte   ########   odam.nl         */
+/*   Updated: 2021/06/25 10:56:28 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class Location
 		std::map<std::string, std::string>	_loginfo;
 
 		Location(void);
-		
+
 	public:
 
 		explicit Location(std::string &match);
@@ -62,6 +62,7 @@ class Location
 		void	setCgiPath(const std::string &cgiPath);
 		void	setAuthBasic(const std::string &authBasic);
 		void	setHTPasswordPath(const std::string &passwordpath);
+		void	createParameter(std::string &key, std::string configLine);
 
 		const bool&		hasOwnAutoIndex() const;
 		const bool&		getAutoIndex() const;
@@ -78,11 +79,12 @@ class Location
 		const std::vector<std::string>&	getMethods() const;
 		const std::vector<std::string>&	getIndices() const;
 		const std::map<std::string, std::string>&	getLogInfo() const;
-		
+
 		const bool&			getAuthMatch(const std::string &username, const std::string &password);
-		
+
 		void				findKey(std::string &key, std::string line, int lineCount);
 		bool				parameterCheck(int &lineCount) const;
+		bool				checkAllowedMethods(const std::string method) const;
 };
 
 std::ostream&	operator<<(std::ostream &os, const Location &location);

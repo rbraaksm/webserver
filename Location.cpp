@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/11 10:33:55 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/24 12:34:05 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/25 11:01:31 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,31 +232,41 @@ const bool&		Location::getIsFileExtension() const {
 const std::map<std::string, std::string>&	Location::getLogInfo() const {
 	return this->_loginfo;
 }
-void				Location::findKey(std::string &key, std::string configLine, int lineCount) {
-	std::map<std::string, setter>::iterator it;
 
+void	Location::createParameter(std::string &key, std::string configLine)
+{
 	std::string parameter;
 
-	if (*(configLine.rbegin()) != ';')
-		throw parseError("syntax error, line doesn't end with ';' ", lineCount);
-	it = this->_typeFunctionMap.find(key);
-	if (it == this->_typeFunctionMap.end())
-		throw parseError("key invalid, not found key: " + key + " ", lineCount);
-	configLine.resize(configLine.size() - 1); // remove ';'
+	configLine.resize(configLine.size() - 1);
 	parameter = configLine.substr(configLine.find_first_of(WHITESPACE) + 1);
-	parameter = Utils::removeLeadingAndTrailingSpaces(parameter);
+	Utils::removeSpacesBeforeAfter(&parameter);
 	(this->*(this->_typeFunctionMap.at(key)))(parameter);
 }
 
-// TODO: deze functie kan echt veel mooier
-bool			Location::parameterCheck(int &lineCount) const {
-	std::vector<std::string>::const_iterator it;
+void	Location::findKey(std::string &key, std::string configLine, int lineCount) {
+	std::map<std::string, setter>::iterator it;
 
-	for (it = this->_methods.begin(); it != this->_methods.end(); ++it)
-	{
-		if ((*it) != allowedMethods[0] && (*it) != allowedMethods[1] && (*it) != allowedMethods[2] && (*it) != allowedMethods[3] && (*it) != allowedMethods[4])
+	if (*(configLine.rbegin()) != ';')
+		throw parseError("syntax error, line doesn't end with ';' ", lineCount);
+	if ((it = this->_typeFunctionMap.find(key)) == this->_typeFunctionMap.end())
+		throw parseError("key invalid, not found key: " + key + " ", lineCount);
+	createParameter(key, configLine);
+}
+
+
+bool	Location::checkAllowedMethods(const std::string method) const
+{
+	for (int i = 0; i < 5; ++i)
+		if (method == allowedMethods[i])
+			return true;
+	return false;
+}
+
+bool	Location::parameterCheck(int &lineCount) const
+{
+	for (std::vector<std::string>::const_iterator it = this->_methods.begin(); it != this->_methods.end(); ++it)
+		if (checkAllowedMethods(*it) == false)
 			throw parseError("invalid method ", lineCount);
-	}
 	if (this->_root.empty() == true)
 		throw parseError("missing root ", lineCount);
 	return true;

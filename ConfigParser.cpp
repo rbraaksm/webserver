@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 15:10:54 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/24 18:11:59 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/25 10:28:13 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,21 +64,18 @@ void	ConfigParser::setLocation(Server *newServer)
 	std::string locationPath = Utils::checkLocationPath(*this->_it, *this->_count_it);
 	Location *newLocation = new Location(locationPath);
 
-	++this->_it;
-	++this->_count_it;
+	this->plusIterators();
 	while (*this->_it != "}")
 	{
 		if (*this->_it == "server {" || Utils::findFirstWord(*this->_it) == "location")
-			throw parseError("block not closed ", *this->_count_it);
+			throw parseError("location block isn't closed ", *this->_count_it);
 		std::string key = Utils::findFirstWord(*this->_it);
 		if (key.size() <= 0)
 			throw parseError("not found " + *this->_it, *this->_count_it);
 		newLocation->findKey(key, *this->_it, *this->_count_it);
-		++this->_it;
-		++this->_count_it;
+		this->plusIterators();
 	}
-	++this->_it;
-	++this->_count_it;
+	this->plusIterators();
 	newLocation->parameterCheck(*this->_count_it);
 	newServer->addLocation(newLocation);
 }
@@ -86,8 +83,7 @@ void	ConfigParser::setLocation(Server *newServer)
 void	ConfigParser::createServer(ServerCluster *serverCluster)
 {
 	Server	*newServer = new Server;
-	++this->_it;
-	++this->_count_it;
+	this->plusIterators();
 	while(*this->_it != "}")
 	{
 		if (Utils::findFirstWord(*_it) == "location")
@@ -96,8 +92,7 @@ void	ConfigParser::createServer(ServerCluster *serverCluster)
 		{
 			std::string key = Utils::findFirstWord(*this->_it);
 			newServer->findKey(key, *this->_it, *this->_count_it);
-			++this->_it;
-			++this->_count_it;
+			this->plusIterators();
 		}
 	}
 	newServer->setAutoIndexOfLocations();

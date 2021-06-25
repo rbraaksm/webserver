@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/10 13:54:38 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/22 10:49:14 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/25 11:01:44 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,9 +170,9 @@ const struct sockaddr_in&	Server::getSocketAddress() const {
 	return this->_addr;
 }
 
-void		Server::addLocation(Location *newLocation) {
+void		Server::addLocation(Location *newLocation)
+{
 	this->_locations.push_back(newLocation);
-	return;
 }
 
 void		Server::findKey(std::string &key, std::string configLine, int lineCount) {

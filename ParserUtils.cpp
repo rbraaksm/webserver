@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 14:59:49 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/24 18:33:46 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/25 09:58:22 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,38 +110,45 @@ void		getKeyValue(const std::string &line, std::string &user, std::string &passw
 	}
 }
 
+std::string		setLocationPath(std::string &startLine, size_t start, size_t end)
+{
+	return startLine.substr(start, end);
+}
+
+std::string		lookForWhitespaces(std::string &startLine, size_t pos_char, size_t pos_end, size_t pos_bracket, int lineCount)
+{
+	size_t only_whitespaces = startLine.find_first_not_of(WHITESPACE, pos_end);
+	if (only_whitespaces != pos_bracket)
+		throw parseError("invalid path, character between path and '{' ", lineCount);
+	return setLocationPath(startLine, pos_char, (pos_end - pos_char));
+}
+
+std::string		lookForEnd(std::string &startLine, size_t pos_bracket, int lineCount)
+{
+	size_t pos_char = startLine.find_first_of(startLine[0], 0);
+	size_t pos_end = startLine.find_first_of(WHITESPACE, pos_char);
+	if (pos_end == std::string::npos)
+		return setLocationPath(startLine, pos_char, (pos_bracket - pos_char));
+	return lookForWhitespaces(startLine, pos_char, pos_end, pos_bracket, lineCount);
+
+}
+
+std::string		lookForBracket(std::string &startLine, int lineCount)
+{
+	size_t pos_bracket = startLine.find_first_of("{", 0);
+	if (pos_bracket == std::string::npos)
+		throw parseError("missing bracket ", lineCount);
+	return lookForEnd(startLine, pos_bracket, lineCount);
+}
+
 std::string		checkLocationPath(std::string &startLine, int lineCount)
 {
 	startLine.erase(0, startLine.find_first_of(WHITESPACE, 0));
 	removeSpacesBeforeAfter((&startLine));
-		std::cout << "Startline =" << startLine << std::endl;
-	if (startLine[0] != '*' || startLine[1] != '.')
-		throw parseError("missing location path ", lineCount);
-	if (startLine.find_first_of("{", 0) == std::string::npos)
-		throw parseError("missing bracket ", lineCount);
-	return startLine = setLocationPath(startLine, lineCount);
+	if ((startLine[0] == '*' && startLine[1] == '.') || startLine[0] == '/')
+		return lookForBracket(startLine, lineCount);
+	throw parseError("missing location path ", lineCount);
 }
 
-std::string		setLocationPath(std::string &startLine, int lineCount)
-{
-	const char c = startLine[0];
-
-	size_t bracketPosition = startLine.find_first_of("{", 0);
-	size_t forwardslashPosition = startLine.find_first_of(c, 0);
-	size_t endoflocationPath = startLine.find_first_of(WHITESPACE, forwardslashPosition);
-	size_t checkIfOnlyBlanksBetweenPathAndBracket = startLine.find_first_not_of(WHITESPACE, endoflocationPath);
-
-	// if (bracketPosition == std::string::npos || forwardslashPosition == std::string::npos)
-	if (endoflocationPath == std::string::npos) // no space between path and bracket
-		startLine = startLine.substr(forwardslashPosition, bracketPosition - forwardslashPosition);
-	else if (checkIfOnlyBlanksBetweenPathAndBracket != bracketPosition)
-		throw parseError("invalid path, character between path and '{' ", lineCount);
-	else
-	{
-		size_t lengthOfLocationPath = endoflocationPath - forwardslashPosition;
-		startLine = startLine.substr(forwardslashPosition, lengthOfLocationPath);
-	}
-	return startLine;
-}
 
 } // End of UTILS Namespace
