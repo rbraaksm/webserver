@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/11 10:33:55 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/25 11:01:31 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/28 19:07:45 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,15 +31,14 @@ Location::Location(std::string &match) : _autoIndex(false), _ownAutoIndex(false)
 	return;
 }
 
-Location::Location(Location const &src) {
+Location::Location(Location const &src)
+{
 	if (this != &src)
 		*this = src;
 	return;
 }
 
-Location::~Location(void) {
-	return;
-}
+Location::~Location(void){}
 
 Location&	Location::operator=(Location const &obj)
 {
@@ -63,6 +62,7 @@ void		Location::printLocation() const {
 	std::cout << *this << std::endl;
 }
 
+/* WAT TE DOEN */
 void		Location::setAutoIndex(const std::string &autoIndex)
 {
 	this->_ownAutoIndex = true;
@@ -71,15 +71,14 @@ void		Location::setAutoIndex(const std::string &autoIndex)
 		this->_autoIndex = true;
 		return;
 	}
-	if (autoIndex != "off")
-	{;}
+	// if (autoIndex != "off")
+	// {;}
 	// return;
 }
 
 void		Location::setMaxBodySize(const std::string &maxBodySize)
 {
 	this->_ownBodySize = true;
-
 	std::stringstream ss;
 
 	ss << maxBodySize;
@@ -181,55 +180,68 @@ const bool&	Location::hasOwnBodySize() const
 	return this->_ownBodySize;
 }
 
-const bool&	Location::getAutoIndex() const {
+const bool&	Location::getAutoIndex() const
+{
 	return this->_autoIndex;
 }
 
-const size_t&	Location::getMaxBodySize() const {
+const size_t&	Location::getMaxBodySize() const
+{
 	return this->_maxBodySize;
 }
 
-const std::string&	Location::getHTPasswordPath() const {
+const std::string&	Location::getHTPasswordPath() const
+{
 	return this->_htpasswd_path;
 }
 
-const std::string&	Location::getMatch() const {
+const std::string&	Location::getMatch() const
+{
 	return this->_match;
 }
 
-const std::string&	Location::getRoot() const {
+const std::string&	Location::getRoot() const
+{
 	return this->_root;
 }
 
-const std::string&	Location::getErrorPage() const {
+const std::string&	Location::getErrorPage() const
+{
 	return this->_errorPage;
 }
 
-const std::vector<std::string>&	Location::getIndices() const {
+const std::vector<std::string>&	Location::getIndices() const
+{
 	return this->_indices;
 }
 
-const std::vector<std::string>&	Location::getMethods() const {
+const std::vector<std::string>&	Location::getMethods() const
+{
 	return this->_methods;
 }
 
-const std::string&	Location::getCGIPath() const {
+const std::string&	Location::getCGIPath() const
+{
 	return this->_cgiPath;
 }
 
-const std::string&	Location::getAuthBasic() const {
+const std::string&	Location::getAuthBasic() const
+{
 	return this->_authBasic;
 }
 
-const std::string&	Location::getAuthUserFile() const {
+const std::string&	Location::getAuthUserFile() const
+{
 	return this->_authBasicUserFile;
 }
 
-const bool&		Location::getIsFileExtension() const {
+const bool&		Location::getIsFileExtension() const
+{
 	return this->_isFileExtension;
 }
 
-const std::map<std::string, std::string>&	Location::getLogInfo() const {
+const std::map<std::string, std::string>&	Location::getLogInfo() const
+{
 	return this->_loginfo;
 }
 
@@ -252,7 +264,6 @@ void	Location::findKey(std::string &key, std::string configLine, int lineCount) 
 		throw parseError("key invalid, not found key: " + key + " ", lineCount);
 	createParameter(key, configLine);
 }
-
 
 bool	Location::checkAllowedMethods(const std::string method) const
 {
@@ -310,6 +321,6 @@ std::ostream&	operator<<(std::ostream &os, const Location &location)
 	{
 		os << "User:" << it_location_loginfo->first << "Password:" << it_location_loginfo->second << '\n';
 	}
-	os << "----------------------------------\n";
+	os << "-------------------------------------------\n";
 	return os;
 }

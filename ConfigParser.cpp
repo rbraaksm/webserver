@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/09 15:10:54 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/25 10:28:13 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/28 18:57:54 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,6 +172,12 @@ void	ConfigParser::parseTheConfigFile(ServerCluster *serverCluster)
 	this->createArray();
 	// this->printFile();
 
+	// _it = _configLines.begin();
+	// for (_count_it = _configCount.begin(); _count_it != _configCount.end(); ++_count_it)
+	// {
+	// 	std::cout << "[" << *_count_it << "] " << *_it << std::endl;
+	// 	++_it;
+	// }
 	this->lookingForServer(serverCluster);
 	if (serverCluster->clusterIsEmpty())
 		throw clusterError("Cluster seems to be empty", "check your input");

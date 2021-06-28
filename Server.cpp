@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/10 13:54:38 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/25 11:01:44 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/28 18:36:55 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,47 +126,58 @@ void			Server::setAlternativeServers(Server *alternative) {
 	return;
 }
 
-const int&		Server::getPortNumber() const {
+const int&		Server::getPortNumber() const
+{
 	return this->_portNumber;
 }
 
-const size_t&	Server::getMaxBodySize() const {
+const size_t&	Server::getMaxBodySize() const
+{
 	return this->_maxBodySize;
 }
 
-const bool&		Server::getAutoIndex() const {
+const bool&		Server::getAutoIndex() const
+{
 	return this->_autoIndex;
 }
 
-const std::string&	Server::getRoot() const {
+const std::string&	Server::getRoot() const
+{
 	return this->_root;
 }
 
-const std::string&	Server::getErrorPage() const {
+const std::string&	Server::getErrorPage() const
+{
 	return this->_errorPage;
 }
 
-const std::string&	Server::getHost() const {
+const std::string&	Server::getHost() const
+{
 	return this->_host;
 }
 
-const std::vector<std::string>&	Server::getServerNames() const {
+const std::vector<std::string>&	Server::getServerNames() const
+{
 	return this->_serverNames;
 }
 
-const std::vector<std::string>&	Server::getIndices() const {
+const std::vector<std::string>&	Server::getIndices() const
+{
 	return this->_indices;
 }
 
-const std::vector<Location*>&	Server::getLocations() const {
+const std::vector<Location*>&	Server::getLocations() const
+{
 	return this->_locations;
 }
 
-const long&	Server::getSocketFD() const {
+const long&	Server::getSocketFD() const
+{
 	return this->_socketFD;
 }
 
-const struct sockaddr_in&	Server::getSocketAddress() const {
+const struct sockaddr_in&	Server::getSocketAddress() const
+{
 	return this->_addr;
 }
 
@@ -176,23 +187,23 @@ void		Server::addLocation(Location *newLocation)
 }
 
 void		Server::findKey(std::string &key, std::string configLine, int lineCount) {
-	std::string parameter;
-
 	if (*(configLine.rbegin()) != ';')
 		throw parseError("syntax error, line doesn't end with ';' ", lineCount);
+
+	std::string parameter;
 	std::map<std::string, setter>::iterator it;
 
-	it = this->_typeFunctionMap.find(key);
-	if (it == this->_typeFunctionMap.end())
+	if ((it = this->_typeFunctionMap.find(key)) == this->_typeFunctionMap.end())
 		throw parseError ("unknown key: " + configLine + " ", lineCount);
-	configLine.resize(configLine.size() - 1); //remove the ';'
+	configLine.resize(configLine.size() - 1);
 	parameter = configLine.substr(configLine.find_first_of(WHITESPACE, 0));
-	parameter = Utils::removeLeadingAndTrailingSpaces(parameter);
+	Utils::removeSpacesBeforeAfter(&parameter);
 	(this->*(this->_typeFunctionMap.at(key)))(parameter);
 	return;
 }
 
-bool	Server::parameterCheck(int &lineCount) const {
+bool	Server::parameterCheck(int &lineCount) const
+{
 	if (this->_portNumber <= 0)
 		throw parseError("invalid port number ", lineCount);
 	if (this->_host.empty())
@@ -200,7 +211,8 @@ bool	Server::parameterCheck(int &lineCount) const {
 	return true;
 }
 
-void	Server::setAutoIndexOfLocations() {
+void	Server::setAutoIndexOfLocations()
+{
 	std::vector<Location*> locs = this->getLocations();
 	for (std::vector<Location*>::iterator it = locs.begin(); it != locs.end(); it++) {
 		if ((*it)->hasOwnAutoIndex() == false) {
@@ -216,7 +228,6 @@ void	Server::setAutoIndexOfLocations() {
 			(*it)->setMaxBodySize(ss.str());
 		}
 	}
-	return;
 }
 
 Location*		Server::findLocation(std::string &match) {

@@ -6,7 +6,7 @@
 /*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/06/11 10:33:58 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/25 10:56:28 by rbraaksm      ########   odam.nl         */
+/*   Updated: 2021/06/28 18:22:10 by rbraaksm      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,22 +24,22 @@ class Location
 		typedef void	(Location::*setter)(const std::string&);
 	private:
 
-		bool	_autoIndex;
-		bool	_ownAutoIndex;
-		bool	_ownBodySize;
-		bool	_isFileExtension;
-		size_t	_maxBodySize;
-		std::string	_match;
-		std::string	_root;
-		std::string	_errorPage;
-		std::vector<std::string>	_methods;
-		std::vector<std::string>	_indices;
+		bool							_autoIndex;
+		bool							_ownAutoIndex;
+		bool							_ownBodySize;
+		bool							_isFileExtension;
+		size_t							_maxBodySize;
+		std::string						_match;
+		std::string						_root;
+		std::string						_errorPage;
+		std::vector<std::string>		_methods;
+		std::vector<std::string>		_indices;
 		std::map<std::string, setter>	_typeFunctionMap;
 
-		std::string	_authBasic;
-		std::string	_authBasicUserFile;
-		std::string _cgiPath;
-		std::string	_htpasswd_path;
+		std::string							_authBasic;
+		std::string							_authBasicUserFile;
+		std::string							_cgiPath;
+		std::string							_htpasswd_path;
 		std::map<std::string, std::string>	_loginfo;
 
 		Location(void);
