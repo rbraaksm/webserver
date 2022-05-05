@@ -1,46 +1,44 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        ::::::::            */
-/*   main.cpp                                           :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: renebraaksma <renebraaksma@student.42.f      +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2021/06/09 12:00:58 by timvancitte   #+#    #+#                 */
-/*   Updated: 2021/06/24 16:56:01 by rbraaksm      ########   odam.nl         */
-/*                                                                            */
-/* ************************************************************************** */
+#include "includes/webserver.hpp"
 
-#include "Webserver.hpp"
-#include "ConfigParser.hpp"
-#include "Error.hpp"
-#include "ServerCluster.hpp"
-
-int main (int argc, char **argv)
+void	signal_handler(int signal)
 {
-	ServerCluster	serverCluster;
-	ConfigParser	configParser(argv);
-	if (argc == 2)
+	if (signal == SIGINT)
 	{
-		try
-		{
-			configParser.openConfigFile();
-			configParser.parseTheConfigFile(&serverCluster);
-
-			// serverCluster.checkDuplicatePorts();
-			// serverCluster.startup();
-			// serverCluster.startListening();
-		}
-		catch (std::exception &e)
-		{
-			std::cerr << e.what() << std::endl;
-			return 1;
-		}
+		std::cout << RED << " Stopping server..." << RESET << std::endl;
+		exit(0);
 	}
-	else
+}
+
+static std::string	checkInput(int ac, char **av)
+{
+	if (ac > 2)
 	{
-		std::cout << "Error: Please provide a .config file\n";
-		std::cout << "Example: ./webserv yourfilename.config" << std::endl;
+		std::cout << "How to run: execute " << GREEN
+		<< "./webserv " << RESET << "or type" << GREEN
+		<< " './webserv [configFile]'" << RESET << std::endl;
+		return "";
+	}
+	std::string ret = "confFiles/valid/default.conf";
+	if (av[1])
+		ret = av[1];
+	return ret;
+}
+
+int main(int ac, char **av)
+{
+	Webserver	webserver;
+	
+	std::string	path = checkInput(ac, av);
+	if (path.empty())
 		return 0;
+	try {
+		signal(SIGINT, signal_handler);
+		webserver.parseConfiguration(path);
+		webserver.establishConnection();
+		webserver.initializeForRun();
+	}
+	catch (std::exception &e) {
+		std::cout << e.what() << std::endl;
 	}
 	return 0;
 }
